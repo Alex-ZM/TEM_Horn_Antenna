@@ -169,7 +169,12 @@ module feed_soporte(g=2.3,lc=5,wMax=74,gp=1.8,nCaras=13,rSuavizado=0,nSegmentos=
 //    minkowski(){
       translate([13/2+g+(g+7.399),wMax/2+(28)/2,13/2+g-rSuavizado+d0/2])
       mirror([0,0,180])
-      placa(N=nSegmentos,gp=gp,wMax=wMax);
+      difference(){
+        placa(N=nSegmentos,gp=gp,wMax=wMax);
+        translate([0,-80,21.33])
+        rotate([0,-15,0])
+        cube([100,100,4]);
+      }
         
 //      sphere(r=rSuavizado,$fn=nCaras);
 //    }
@@ -201,8 +206,12 @@ module feed_live(g=2.3,lc=5,wMax=74,gp=1.8,nCaras=13,rSuavizado=0,nSegmentos=30,
     
 //    minkowski(){
       translate([13/2+g+(g+7.399),wMax/2+(28)/2,13/2+g+rSuavizado-d0/2])
-      placa(N=nSegmentos,gp=gp,wMax=wMax);
-    
+      difference(){
+        placa(N=nSegmentos,gp=gp,wMax=wMax);
+        translate([0,-80,21.33])
+        rotate([0,-15,0])
+        cube([100,100,4]);
+      }
 //      sphere(r=rSuavizado,$fn=nCaras);
 //    }
   }

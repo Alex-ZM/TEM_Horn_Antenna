@@ -1,4 +1,4 @@
-module placa(N=10,freq=2,d0=0.8,dL=74,wMin=12.05,wMax=74,gp=2,eta=120*3.142,Z0=50){
+module placa(N=10,freq=2,d0=0.8,dL=74,wMin=12.05,wMax=74,gp=2.5,eta=120*3.142,Z0=50){
   // N: número de secciones
   // freq: frecuencia mínima
   // d0: dist mínima entre las placas
@@ -266,7 +266,7 @@ module conector(a=12.72,gConector=2,lCoax=3,dAgujeros=12.2,rAgujeros=2.6/2,lPTFE
 
 wMax = 74; 
 g = 2.5;  // Grosor del soporte del feed
-gp = 1.8;  // Grosor de las placas
+gp = 2.3;  // Grosor de las placas
 lc = 0;  // Longitud del cable
 nCaras = 13;  // Num caras del suavizado
 rSuavizado = 0;  // Radio del suavizado (~1 mm)
@@ -276,15 +276,15 @@ grCresta=2.3;
 //color("green")
 ///render()
 translate([10,0,0])
-feed_live(rSuavizado=rSuavizado,nCaras=nCaras,g=g);
+feed_live(rSuavizado=rSuavizado,nCaras=nCaras,g=g,gp=gp);
 
 render()
 //color([0.8,0.8,0,0.5])
 difference(){
   //render()
-  feed_soporte(g=g,lc=lc,grCresta=grCresta);
+  feed_soporte(g=g,lc=lc,grCresta=grCresta,gp=gp);
   
-  #translate([13/2+g+1.26*2-0.02,28/2,-6.6])
+  #translate([13/2+g+1.26*2-0.02,28/2,-6.3])//original:z=-6.6
   conector();
   #translate([13/2+g+1.26*2-0.02,-28/2,-6.6])
   conector();

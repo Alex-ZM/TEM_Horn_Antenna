@@ -5,17 +5,18 @@ from scipy.fft import fft, fftfreq
 from scipy.interpolate import interp1d
 
 # Datos S11 experimentales
-
 network1 = rf.Network('111111.s1p')
 network2 = rf.Network('22222.s1p')
 
-s11_mag_db1 = network1.s_db[:, 0, 0]
-frequencies_ghz1 = network1.f / 1e9
-s11_complex1 = network1.s[:, 0, 0]
+# Convierte S11 en VSWR para resultados experimentales
+def s11_to_vswr(s11_complex):
+    return (1 + np.abs(s11_complex)) / (1 - np.abs(s11_complex))
 
-s11_mag_db2 = network2.s_db[:, 0, 0]
+vswr1 = s11_to_vswr(network1.s[:, 0, 0])
+frequencies_ghz1 = network1.f / 1e9
+
+vswr2 = s11_to_vswr(network2.s[:, 0, 0])
 frequencies_ghz2 = network2.f / 1e9
-s11_complex2 = network2.s[:, 0, 0]
 
 # Corriente y voltaje de la simulación
 current_file_path = 'current.txt'
@@ -52,28 +53,28 @@ non_zero_current_f = np.abs(I_f_pos) > 1e-12
 Zin_complex[non_zero_current_f] = V_f_pos[non_zero_current_f] / I_f_pos[non_zero_current_f]
 ZL_complex[non_zero_current_f] = Zin_complex[non_zero_current_f] - 50
 
-# Se calcula S11
+# Calcula S11 y VSWR
 S11_complex_calculated = np.zeros_like(ZL_complex, dtype=complex)
 non_zero_denominator = np.abs(ZL_complex + Z0) > 1e-12
 S11_complex_calculated[non_zero_denominator] = (ZL_complex[non_zero_denominator] - Z0) / (ZL_complex[non_zero_denominator] + Z0)
-S11_mag_db_calculated = 20 * np.log10(np.abs(S11_complex_calculated))
-valid_s11_indices_calc = ~np.isnan(S11_complex_calculated) & ~np.isinf(S11_complex_calculated)
+vswr_simulated = s11_to_vswr(S11_complex_calculated)
+valid_vswr_indices_calc = ~np.isnan(vswr_simulated) & ~np.isinf(vswr_simulated)
 
-# Gráfica Combinada de S11 (dB)
+# Gráfica Combinada de VSWR
 plt.figure(figsize=(10, 7))
-plt.plot(frequencies_ghz1, s11_mag_db1, label=f'$|S_{{11}}|$ (dB) - Antena con soporte grueso', color='tan', linestyle='-')
-plt.plot(frequencies_ghz2, s11_mag_db2, label=f'$|S_{{11}}|$ (dB) - Antena con soporte fino', color='olive', linestyle='-')
-plt.plot(frequencies_ghz_fourier[valid_s11_indices_calc], S11_mag_db_calculated[valid_s11_indices_calc], label='$|S_{{11}}|$ (dB) - Antena simulada', color='blue', linestyle='--')
+plt.plot(frequencies_ghz1, vswr1, label='VSWR - Antena con soporte grueso', color='tan', linestyle='-')
+plt.plot(frequencies_ghz2, vswr2, label='VSWR - Antena con soporte fino', color='olive', linestyle='-')
+plt.plot(frequencies_ghz_fourier[valid_vswr_indices_calc], vswr_simulated[valid_vswr_indices_calc], 
+         label='VSWR - Antena simulada', color='blue', linestyle='--')
 
-plt.axhline(y=-10, color='darkslategrey', linestyle='-', label='Umbral $|S_{11}|$ = -10 dB (VSWR ≈ 2:1)')
+plt.axhline(y=2, color='darkslategrey', linestyle='-', label='Umbral VSWR = 2:1 ($|S_{11}|$ ≈ -10 dB)')
 
-plt.title('Magnitud de $S_{11}$ vs. Frecuencia')
+plt.title('Relación de Onda Estacionaria (VSWR) vs. Frecuencia')
 plt.xlabel('Frecuencia (GHz)')
-plt.ylabel('$|S_{11}|$ (dB)')
-plt.ylim(-27, 1)
-plt.xlim(0, 8.5) 
+plt.ylabel('VSWR')
+plt.ylim(1, 8) 
+plt.xlim(1, 8.5) 
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.show()
-
